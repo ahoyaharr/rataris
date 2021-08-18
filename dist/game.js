@@ -1,6 +1,6 @@
 var config = {
     type: Phaser.AUTO,
-    width: 1600,
+    width: 900,
     height: 900,
     physics: {
         default: 'arcade',
@@ -20,17 +20,8 @@ var config = {
 function preload() {
     this.load.image("cursor", "./assets/cursor.png");
     this.load.image("tiles", "./assets/tilesets/01003803-extruded.png");
-    // this.load.image("tiles", "./assets/tilesets/01003803.png");
     this.load.tilemapTiledJSON("map", "./assets/maps/1.json");
 
-    // this.load.image('sky', 'assets/sky.png');
-    // this.load.image('ground', 'assets/platform.png');
-    // this.load.image('star', 'assets/star.png');
-    // this.load.image('bomb', 'assets/bomb.png');
-    // this.load.spritesheet('dude',
-    //     'assets/dude.png',
-    //     { frameWidth: 32, frameHeight: 48 }
-    // );
 }
 
 function create() {
@@ -52,22 +43,14 @@ function create() {
 
     // Phaser supports multiple cameras, but you can access the default camera like this:
     const camera = this.cameras.main;
-    camera.zoom = 5
+    camera.zoom = 2
 
     // Set up the arrows to control the camera
     const cursors = this.input.keyboard.createCursorKeys();
 
-    // controls = new Phaser.Cameras.Controls.FixedKeyControl({
-    //     camera: camera,
-    //     left: cursors.left,
-    //     right: cursors.right,
-    //     up: cursors.up,
-    //     down: cursors.down,
-    //     speed: 0.5
-    // });
-
     // Constrain the camera so that it isn't allowed to move outside the width/height of tilemap
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     // Help text that has a "fixed" position on the screen
     this.add
@@ -80,9 +63,11 @@ function create() {
         .setScrollFactor(0);
 
     player = this.physics.add.sprite(16, 16, 'cursor');
+    player.setOrigin(0, 0)
     player.setCollideWorldBounds(true);
 
     camera.startFollow(player)
+
 
     // this.add.image(400, 300, 'sky');
     //
@@ -137,28 +122,32 @@ function create() {
     //
     // this.physics.add.collider(stars, platforms);
     // this.physics.add.overlap(player, stars, (player, star) => star.disableBody(true, true), null, this);
+    player.frames_since_move = 0;
 }
 
 
 function update(time, delta) {
     cursors = this.input.keyboard.createCursorKeys();
 
+    if (player.frames_since_move == 0) {
+        if (cursors.left.isDown) {
+            player.x -= 16;
+        } else if (cursors.right.isDown) {
+            player.x += 16;
+        }
 
-    if (cursors.left.isDown) {
-        player.setVelocityX(-64);
-    } else if (cursors.right.isDown) {
-        player.setVelocityX(64);
+        if (cursors.up.isDown) {
+            player.y -= 16;
+        } else if (cursors.down.isDown) {
+            player.y += 16;
+        }
+
+        player.frames_since_move = 5;
     } else {
-        player.setVelocityX(0)
+        player.frames_since_move -= 1;
     }
 
-    if (cursors.up.isDown) {
-        player.setVelocityY(-64);
-    } else if (cursors.down.isDown) {
-        player.setVelocityY(64);
-    } else {
-        player.setVelocityY(0);
-    }
+
 
     // Apply the controls to the camera each update tick of the game
     // controls.update(delta);
